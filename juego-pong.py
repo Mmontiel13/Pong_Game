@@ -10,7 +10,10 @@ FPS = 60
 NEGRO = (0, 0, 0)  
 AZUL = (0, 0, 255) 
 RED = (255, 0, 0) 
-TAM_CIRCULO = 10  
+TAM_CIRCULO = 10 
+
+MAX_PUNTAJE = 1
+
 
 class Screen:
     def __init__(self):
@@ -168,6 +171,7 @@ def main():
             keys = pygame.key.get_pressed()
             if keys[pygame.K_r]:
                 ventana.game_state = "start_menu"
+                puntaje = Puntaje()  # Reiniciar el puntaje
             if keys[pygame.K_q]:
                 pygame.quit()
                 quit()
@@ -191,11 +195,13 @@ def main():
                 puntaje.mostrar_en_consola()
 
             ventana.draw_score(puntaje.puntaje_jugador_1, puntaje.puntaje_jugador_2)
+
+            # Verificar si alguno de los jugadores ha alcanzado el puntaje máximo
+            if puntaje.puntaje_jugador_1 >= MAX_PUNTAJE or puntaje.puntaje_jugador_2 >= MAX_PUNTAJE:
+                ventana.game_state = "game_over"
             
             pygame.display.flip()
             pygame.time.Clock().tick(FPS)
-        
- 
-
+            
 if __name__ == "__main__":
     main()
