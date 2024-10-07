@@ -26,7 +26,7 @@ class Screen:
         self.ventana.fill(NEGRO)
         font = pygame.font.SysFont('arial', 40)
         title = font.render('Mayate`s game', True, (255, 255, 255))
-        start_button = font.render('Start', True, (255, 255, 255))
+        start_button = font.render('Key (Space) to Start', True, (255, 255, 255))
         self.ventana.blit(title, (VENTANA_HORI/2 - title.get_width()/2, VENTANA_VERT/2 - title.get_height()/2))
         self.ventana.blit(start_button, (VENTANA_HORI/2 - start_button.get_width()/2, VENTANA_VERT/2 + start_button.get_height()/2))
         pygame.display.update()
@@ -156,9 +156,16 @@ def main():
                     raqueta_1.dir_y = -10
                 if event.key == pygame.K_s:
                     raqueta_1.dir_y = 10
+                if event.key == pygame.K_UP:
+                    raqueta_2.dir_y = -10
+                if event.key == pygame.K_DOWN:
+                    raqueta_2.dir_y = 10
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_w or event.key == pygame.K_s:
                     raqueta_1.dir_y = 0
+                if event.key == pygame.K_UP or event.key == pygame.K_DOWN:
+                    raqueta_2.dir_y = 0
+                    
         
         if ventana.game_state == "start_menu":
             ventana.draw_start_menu()
@@ -187,6 +194,8 @@ def main():
             raqueta_1.mover()
 
             raqueta_2.dibujar(ventana.ventana)
+            raqueta_2.mover()
+
             pelota.rebotar(raqueta_1, raqueta_2)
 
             anotacion = pelota.anotacion()
