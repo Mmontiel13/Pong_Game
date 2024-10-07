@@ -1,7 +1,7 @@
 import random
 import pygame
 from pygame.locals import QUIT
-
+from music import Musica
 
 VENTANA_HORI = 1200  
 VENTANA_VERT = 600  
@@ -13,7 +13,6 @@ RED = (255, 0, 0)
 TAM_CIRCULO = 10 
 
 MAX_PUNTAJE = 1
-
 
 class Screen:
     def __init__(self):
@@ -44,7 +43,6 @@ class Screen:
 
     def draw_score(self, puntaje_jugador_1, puntaje_jugador_2):
         font = pygame.font.SysFont('arial', 40)
-        # Mostrar el marcador en la parte superior de la pantalla
         score_text = font.render(f'{puntaje_jugador_1} - {puntaje_jugador_2}', True, (255, 255, 255))
         self.ventana.blit(score_text, (VENTANA_HORI / 2 - score_text.get_width() / 2, 20))
         pygame.display.update()
@@ -82,17 +80,19 @@ class PelotaPong:
         self.x += self.dir_x
         self.y += self.dir_y
 
-    def rebotar(self, raqueta_1, raqueta_2):
+    def rebotar(self, raqueta_1, raqueta_2, reproductor):
         if self.pelota.colliderect(raqueta_1.raqueta):
+            reproductor.reproducir_rebote()
             raqueta_centro = raqueta_1.y + raqueta_1.alto / 2
             pelota_centro = self.y
             if pelota_centro < raqueta_centro:
-                self.dir_y = -abs(self.dir_y) 
+                self.dir_y = -abs(self.dir_y)
             else:
                 self.dir_y = abs(self.dir_y)
-            self.dir_x = -self.dir_x 
+            self.dir_x = -self.dir_x
 
         if self.pelota.colliderect(raqueta_2.raqueta):
+            reproductor.reproducir_rebote()
             raqueta_centro = raqueta_2.y + raqueta_2.alto / 2
             pelota_centro = self.y
             if pelota_centro < raqueta_centro:
@@ -139,7 +139,9 @@ class Puntaje:
 
 def main():
     pygame.init()
+    reproductor = Musica()
     ventana = Screen()
+    reproductor.reproducir_musica_fondo()  # Mueve esto aquí para que la música de fondo inicie en el menú
 
     pelota = PelotaPong()
     raqueta_1 = RaquetaPong(60)
@@ -165,8 +167,7 @@ def main():
                     raqueta_1.dir_y = 0
                 if event.key == pygame.K_UP or event.key == pygame.K_DOWN:
                     raqueta_2.dir_y = 0
-                    
-        
+
         if ventana.game_state == "start_menu":
             ventana.draw_start_menu()
             keys = pygame.key.get_pressed()
@@ -179,12 +180,12 @@ def main():
             if keys[pygame.K_r]:
                 ventana.game_state = "start_menu"
                 puntaje = Puntaje()  # Reiniciar el puntaje
+                reproductor.reproducir_musica_fondo()  # Reiniciar la música de fondo
             if keys[pygame.K_q]:
                 pygame.quit()
                 quit()
 
         elif ventana.game_state == "game":
-            # Limpia la pantalla antes de dibujar
             ventana.ventana.fill(NEGRO)
 
             pelota.dibujar(ventana.ventana)
@@ -196,7 +197,7 @@ def main():
             raqueta_2.dibujar(ventana.ventana)
             raqueta_2.mover()
 
-            pelota.rebotar(raqueta_1, raqueta_2)
+            pelota.rebotar(raqueta_1, raqueta_2, reproductor)
 
             anotacion = pelota.anotacion()
             if anotacion > 0:
@@ -205,12 +206,13 @@ def main():
 
             ventana.draw_score(puntaje.puntaje_jugador_1, puntaje.puntaje_jugador_2)
 
-            # Verificar si alguno de los jugadores ha alcanzado el puntaje máximo
             if puntaje.puntaje_jugador_1 >= MAX_PUNTAJE or puntaje.puntaje_jugador_2 >= MAX_PUNTAJE:
                 ventana.game_state = "game_over"
+                reproductor.detener_musica_fondo()  # Detener la música antes de reproducir aplausos
+                reproductor.gameOver()
             
             pygame.display.flip()
             pygame.time.Clock().tick(FPS)
-            
+
 if __name__ == "__main__":
     main()
