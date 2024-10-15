@@ -1,8 +1,8 @@
 import pygame
 
-MUSICA_FONDO = r"D:\DOCUMENTOS\UNI\Universidad\BUAP\7mo SEMESTRE\Desarrollo de Videojuegos\programacion\source\pongRep\music\Battle2.mp3"
-REBOTE = r"D:\DOCUMENTOS\UNI\Universidad\BUAP\7mo SEMESTRE\Desarrollo de Videojuegos\programacion\source\pongRep\music\reboteR.mp3"
-APLAUSOS = r"D:\DOCUMENTOS\UNI\Universidad\BUAP\7mo SEMESTRE\Desarrollo de Videojuegos\programacion\source\pongRep\music\aplausos.mp3"
+MUSICA_FONDO = r"./music/Battle2.mp3"
+REBOTE = r"./music/reboteR.mp3"
+APLAUSOS = r"./music/aplausos.mp3"
 
 class Musica:
     def __init__(self):

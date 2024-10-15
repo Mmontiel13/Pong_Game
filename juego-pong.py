@@ -12,7 +12,7 @@ AZUL = (0, 0, 255)
 RED = (255, 0, 0) 
 TAM_CIRCULO = 10 
 
-MAX_PUNTAJE = 1
+MAX_PUNTAJE = 5
 
 class Screen:
     def __init__(self):
@@ -24,7 +24,7 @@ class Screen:
     def draw_start_menu(self):
         self.ventana.fill(NEGRO)
         font = pygame.font.SysFont('arial', 40)
-        title = font.render('Mayate`s game', True, (255, 255, 255))
+        title = font.render('Pong game', True, (255, 255, 255))
         start_button = font.render('Key (Space) to Start', True, (255, 255, 255))
         self.ventana.blit(title, (VENTANA_HORI/2 - title.get_width()/2, VENTANA_VERT/2 - title.get_height()/2))
         self.ventana.blit(start_button, (VENTANA_HORI/2 - start_button.get_width()/2, VENTANA_VERT/2 + start_button.get_height()/2))
@@ -68,12 +68,15 @@ class RaquetaPong:
         pygame.draw.rect(superficie, AZUL, self.raqueta)
 
 class PelotaPong:
+    VELOCIDAD_INICIAL = 5  # Aumenta este valor para una velocidad más rápida
+
     def __init__(self):
         self.radio = TAM_CIRCULO
         self.x = VENTANA_HORI / 2
         self.y = VENTANA_VERT / 2
-        self.dir_x = random.choice([-5, 5])
-        self.dir_y = random.choice([-5, 5])
+        # Usa la velocidad inicial en lugar de valores fijos
+        self.dir_x = random.choice([-self.VELOCIDAD_INICIAL, self.VELOCIDAD_INICIAL])
+        self.dir_y = random.choice([-self.VELOCIDAD_INICIAL, self.VELOCIDAD_INICIAL])
         self.pelota = 0
 
     def mover(self):
@@ -81,28 +84,28 @@ class PelotaPong:
         self.y += self.dir_y
 
     def rebotar(self, raqueta_1, raqueta_2, reproductor):
-        if self.pelota.colliderect(raqueta_1.raqueta):
-            reproductor.reproducir_rebote()
-            raqueta_centro = raqueta_1.y + raqueta_1.alto / 2
-            pelota_centro = self.y
-            if pelota_centro < raqueta_centro:
-                self.dir_y = -abs(self.dir_y)
-            else:
-                self.dir_y = abs(self.dir_y)
-            self.dir_x = -self.dir_x
+        pelota_rect = pygame.Rect(self.x - self.radio, self.y - self.radio, self.radio * 2, self.radio * 2)
 
-        if self.pelota.colliderect(raqueta_2.raqueta):
+    # Colisión con la primera raqueta
+        if pelota_rect.colliderect(raqueta_1.raqueta):
             reproductor.reproducir_rebote()
-            raqueta_centro = raqueta_2.y + raqueta_2.alto / 2
-            pelota_centro = self.y
-            if pelota_centro < raqueta_centro:
-                self.dir_y = -abs(self.dir_y)
-            else:
-                self.dir_y = abs(self.dir_y)
-            self.dir_x = -self.dir_x
+            offset_y = pelota_rect.centery - (raqueta_1.y + raqueta_1.alto // 2)
+            factor_rebote = offset_y / (raqueta_1.alto // 2)
+            self.dir_y = factor_rebote * PelotaPong.VELOCIDAD_INICIAL
+            self.dir_x *= -1
 
-        if self.y <= 0 or self.y + self.radio >= VENTANA_VERT:
-            self.dir_y = -self.dir_y
+    # Colisión con la segunda raqueta
+        if pelota_rect.colliderect(raqueta_2.raqueta):
+            reproductor.reproducir_rebote()
+            offset_y = pelota_rect.centery - (raqueta_2.y + raqueta_2.alto // 2)
+            factor_rebote = offset_y / (raqueta_2.alto // 2)
+            self.dir_y = factor_rebote * PelotaPong.VELOCIDAD_INICIAL
+            self.dir_x *= -1
+
+    # Rebote en los bordes superior e inferior
+        if self.y <= 0 or self.y + self.radio * 2 >= VENTANA_VERT:
+            self.dir_y *= -1
+
 
     def anotacion(self):
         if self.x <= 0:
@@ -116,11 +119,12 @@ class PelotaPong:
     def reiniciar(self):
         self.x = VENTANA_HORI / 2 - self.radio / 2
         self.y = VENTANA_VERT / 2 - self.radio / 2
+        # Mantén la velocidad rápida al reiniciar
         self.dir_x = -self.dir_x
-        self.dir_y = random.choice([-5, 5])
+        self.dir_y = random.choice([-self.VELOCIDAD_INICIAL, self.VELOCIDAD_INICIAL])
 
     def dibujar(self, superficie):
-        self.pelota = pygame.Rect(self.x - self.radio, self.y - self.radio, self.radio * 2, self.radio * 2)
+        pelota_rect = pygame.Rect(self.x - self.radio, self.y - self.radio, self.radio * 2 ,self.radio * 2)
         pygame.draw.circle(superficie, RED, (int(self.x), int(self.y)), self.radio)
 
 class Puntaje:
@@ -155,13 +159,13 @@ def main():
                 jugando = False
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_w:
-                    raqueta_1.dir_y = -10
+                    raqueta_1.dir_y = -15
                 if event.key == pygame.K_s:
-                    raqueta_1.dir_y = 10
+                    raqueta_1.dir_y = 15
                 if event.key == pygame.K_UP:
-                    raqueta_2.dir_y = -10
+                    raqueta_2.dir_y = -15
                 if event.key == pygame.K_DOWN:
-                    raqueta_2.dir_y = 10
+                    raqueta_2.dir_y = 15
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_w or event.key == pygame.K_s:
                     raqueta_1.dir_y = 0
